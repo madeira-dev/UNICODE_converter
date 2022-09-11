@@ -1,0 +1,5 @@
+- ler arquivo com valores em utf8 convertendo os valores para códigos de 32 bits
+- converter valores lidos em utf8 para utf32
+-
+-
+-
