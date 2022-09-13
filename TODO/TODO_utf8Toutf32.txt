@@ -1,11 +1,7 @@
 -> ler arquivo com valores em utf8 convertendo os valores para códigos de 32 bits
 -> converter valores lidos em utf8 para utf32
--> gravar em arquivo de saida os valores convertidos de utf8 apra utf32
+-> gravar em arquivo de saida os valores convertidos de utf8 para utf32
 
-
-ideia pra ler arquivo utf8:
--> le ele direto com fread mas os espaços entre os caracteres deve ser um problema,
-então será q da pra ler com fread escrevendo tudo em uma string pra poder converter
-cada caracter da string pra unsigned int e quando encontrar um caracter correspondente
-ao espaço atualiza a string completa sem ele (com ctz tem algum jeito mais facil do q
-esse)
+como ler o arquivo:
+-> ler o primeiro byte, passando ele pra um char (1 byte)
+de acordo com o valor lido por esse char (0xxxxxxx, 110xxxxx, 1110xxxx, 11110xxx), ler o resto do arquivo
