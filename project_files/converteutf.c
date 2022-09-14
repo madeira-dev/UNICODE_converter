@@ -1,16 +1,16 @@
-/* Gabriel de Oliveira Rosa Mariano Madeira 2111471 3WA */
-/* Juliana Pinheiro dos Santos 2110516 3WA */
+/* Gabriel de Oliveira Rosa Mariano Madeira 2111471 3WB */
+/* Juliana Pinheiro dos Santos 2110516 3WB */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "converteutf.h"
 
-#define ARRAY_SIZE(array) (sizeof(array) / sizeof(array[0]))
-
 int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 {
-    char test;
+    unsigned char test;
+    unsigned char tmp = 1;
+    int n_bytes = 0;
 
     if (!arquivo_entrada)
     {
@@ -20,10 +20,17 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 
     fread(&test, sizeof(char), 1, arquivo_entrada);
 
-    printf("%b\n", test);
+    while ((test & 0b10000000) != 0)
+    {
+        test = test << 1;
+        n_bytes++;
+    }
+
+    printf("%d\n", n_bytes);
 
     return 0;
 }
+
 // int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
 // {
 // }
