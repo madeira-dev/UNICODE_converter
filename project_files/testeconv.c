@@ -8,7 +8,7 @@ int main(void)
     FILE *entry_file;
     FILE *output_file;
 
-    entry_file = fopen("test_1", "rb");
+    entry_file = fopen("utf8_testFileIn", "rb");
     output_file = fopen("utf8_testFileOut", "wb");
     converteUtf8Para32(entry_file, output_file);
     fclose(entry_file);

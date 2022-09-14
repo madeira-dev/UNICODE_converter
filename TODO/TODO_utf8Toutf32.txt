@@ -1,6 +1,6 @@
--> ler arquivo com valores em utf8 convertendo os valores para códigos de 32 bits
+-> ler arquivo com valores em utf8
 -> converter valores lidos em utf8 para utf32
--> gravar em arquivo de saida os valores convertidos de utf8 para utf32
+-> gravar em arquivo de saida os valores convertidos de utf8 para utf32, lembrando do BOM
 
 como ler o arquivo:
 -> ler o primeiro byte, passando ele pra um char (1 byte)
@@ -10,9 +10,6 @@ de acordo com o valor lido por esse char (0xxxxxxx, 110xxxxx, 1110xxxx, 11110xxx
 -> le tudo de uma vez e usa bitshift pra ler cada byte, tipo, leu o primeiro, descobriu quantos bytes tem no total,
 por exemplo se tiver 3, da outros 2 bitshifts do tamanho de um byte pra ler os outros salvando eles em um buffer,
 no caso concatenando os bits
-
--> outra ideia é fazer um mask de cada bit individual ate achar o zero, por exemplo fazer mask de 1000000 pra saber
-o primeiro bit, depois dar um bit shift pra direita na mask, entao, 01000000 e assim vai até o quarto bit
 
 
 como é feita a conversão:
