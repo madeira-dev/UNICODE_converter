@@ -6,90 +6,16 @@
 #include <string.h>
 #include "converteutf.h"
 
-// int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
-// {
-//     unsigned char test;
-//     unsigned char tmp_test;
-//     int n_bytes = 0;
+/* ok na vdd a leitura do utf8 ta errada, foi testada apenas a leitura de um arquivo com só um caracter.
+nesse caso a leitura funciona, para ler com mais de um caracter precisa considerar que o divisor entre
+todos eles é um espaço em branco ' '. imagino que basta ler o caracter e testar se é um espaço em hex
+é 20 e em binário é 0010 0000, se for um espaço pula ele de algum jeito e lê o próximo caracter */
 
-//     if (!arquivo_entrada)
-//     {
-//         fprintf(stderr, "erro ao abrir arquivo para leitura\n");
-//         return -1;
-//     }
-
-//     fread(&test, sizeof(char), 1, arquivo_entrada);
-//     /* lendo o primeiro byte do arquivo para saber quantos bytes o caracter ocupa */
-//     tmp_test = test; // salvando o valor deste primeiro byte para usá-lo depois de fazer bit shift
-
-//     while ((test & 0b10000000) != 0) /* loop para descobrir quantos bits 1 no início o primeiro byte apresenta */
-//     {
-//         test = test << 1;
-//         n_bytes++;
-//     }
-
-//     if (n_bytes == 0)
-//         printf("tmp test n_bytes=0\n");
-
-//     else if (n_bytes == 2)
-//         printf("tmp test n_bytes=2\n");
-
-//     else if (n_bytes == 3)
-//     {
-//         unsigned char byte1, byte2, byte3;
-//         byte1 = tmp_test & 0b00011111; /* definindo o primeiro byte como os bits do byte lido exceto os iniciais
-//         representando o numero de bytes total */
-//         unsigned char top;             /* variavel top feita pra testar se tem mais alguma coisa depois dos
-//         3 bytes e tem (??), porém depois desse top não tem mais nada */
-//         fread(&byte2, sizeof(char), 1, arquivo_entrada);
-//         fread(&byte3, sizeof(char), 1, arquivo_entrada);
-//         // fread(&top, sizeof(char), 1, arquivo_entrada);
-
-//         printf("'byte1' em bin com bits de continuacao: %b\n", tmp_test);
-//         printf("'byte2' em bin com bits de continuacao: %b\n", byte2);
-//         printf("'byte3' em bin com bits de continuacao: %b\n\n", byte3);
-
-//         printf("\n");
-//         printf("'byte1' em hex com bits de continuacao: %x\n", tmp_test);
-//         printf("'byte2' em hex com bits de continuacao: %x\n", byte2);
-//         printf("'byte3' em hex com bits de continuacao: %x\n\n", byte3);
-
-//         byte2 = byte2 & 0b00111111; // & operation para remover bytes de continuacao
-//         byte3 = byte3 & 0b00111111; // & operation para remover bytes de continuacao
-
-//         // printf("'test' em bin sem bits de continuacao: %b\n\n", tmp_test);
-//         printf("\n");
-//         printf("'byte1' em bin sem bits de continuacao: %b\n", byte1);
-//         printf("'byte2' em bin sem bits de continuacao: %b\n", byte2);
-//         printf("'byte3' em bin sem bits de continuacao: %b\n", byte3);
-//         printf("\n");
-
-//         // printf("top in bin: %b\n", top); /* aparentemente o top não é byte de continuação, já que quando representado
-//         // ele só tem 4 bits, ou seja, os 4 primeiros são zero, porém como esses bits não mudam a cada execução do código
-//         // eles não são lixo da memória. o que ele é??? algum padrão de fim de arquivo utf8?? */
-
-//         printf("\n");
-//         printf("'byte1' em hex sem bits de continuacao: %x\n", byte1);
-//         printf("'byte2' em hex sem bits de continuacao: %x\n", byte2);
-//         printf("'byte3' em hex sem bits de continuacao: %x\n", byte3);
-//         // printf("top in hex: %x\n\n", top);
-//     }
-
-//     else if (n_bytes == 4)
-//     {
-//         unsigned char byte1, byte2, byte3, byte4;
-//         printf("tmp test n_bytes=4\n");
-//     }
-
-//     // printf("n_bytes: %d\n", n_bytes);
-
-//     return 0;
-// }
-
-int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
+int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 {
-    unsigned char BOM_byte1, BOM_byte2, BOM_byte3, BOM_byte4;
-    int test_BOM;
+    unsigned char first_byte;
+    unsigned char final_value;
+    int n_bytes = 0;
 
     if (!arquivo_entrada)
     {
@@ -97,23 +23,98 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
         return -1;
     }
 
-    fread(&test_BOM, sizeof(int), 1, arquivo_entrada);
-    // fread(&BOM_byte1, sizeof(char), 1, arquivo_entrada);
-    // fread(&BOM_byte2, sizeof(char), 1, arquivo_entrada);
-    // fread(&BOM_byte3, sizeof(char), 1, arquivo_entrada);
-    // fread(&BOM_byte4, sizeof(char), 1, arquivo_entrada);
+    /* lendo o primeiro byte do arquivo para saber quantos bytes o caracter ocupa */
+    fread(&first_byte, sizeof(unsigned char), 1, arquivo_entrada);
+    final_value = first_byte;
 
-    // printf("BOM_byte1: %x\n", BOM_byte1);
-    // printf("BOM_byte1: %x\n", BOM_byte2);
-    // printf("BOM_byte1: %x\n", BOM_byte3);
-    // printf("BOM_byte1: %x\n", BOM_byte4);
-
-    printf("test_BOM: %08x\n", test_BOM);
-
-    if (test_BOM == 0xFEFF)
+    /* verificando se o caracter é um espaço para pular para o próximo */
+    if (first_byte == 0x20)
     {
-        printf("little endian\n");
+        unsigned char jmp_space;
+        fread(&jmp_space, sizeof(unsigned char), 1, arquivo_entrada);
+        final_value = jmp_space;
+    }
+
+    /* loop para descobrir quantos bits 1 no início o primeiro byte apresenta */
+    while ((final_value & 0b10000000) != 0)
+    {
+        final_value = final_value << 1;
+        n_bytes++;
+    }
+
+    if (n_bytes == 0)
+        printf("tmp first_byte n_bytes=0\n");
+
+    else if (n_bytes == 2)
+        printf("tmp first_byte n_bytes=2\n");
+
+    else if (n_bytes == 3)
+    {
+        unsigned char byte1, byte2, byte3;
+
+        /* definindo o primeiro byte como os bits do byte lido exceto os iniciais representando o numero de bytes total */
+        byte1 = final_value & 0b00011111;
+
+        fread(&byte2, sizeof(char), 1, arquivo_entrada);
+        fread(&byte3, sizeof(char), 1, arquivo_entrada);
+
+        byte2 = byte2 & 0b00111111; /* & operation para remover bytes de continuacao */
+        byte3 = byte3 & 0b00111111; /* & operation para remover bytes de continuacao */
+    }
+
+    else if (n_bytes == 4)
+    {
+        // unsigned char byte1, byte2, byte3, byte4;
+        printf("tmp first_byte n_bytes=4\n");
     }
 
     return 0;
 }
+
+// int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
+// {
+//     unsigned int utf32_BOM;
+//     unsigned int utf32_conteudo;
+
+//     if (!arquivo_entrada)
+//     {
+//         fprintf(stderr, "erro ao abrir arquivo para leitura\n");
+//         return -1;
+//     }
+
+//     fread(&utf32_BOM, sizeof(int), 1, arquivo_entrada);      /* lendo BOM do arquivo */
+//     fread(&utf32_conteudo, sizeof(int), 1, arquivo_entrada); /* lendo valores do arquivo */
+
+//     printf("utf32_BOM: %x\n", utf32_BOM);
+//     printf("utf32_conteudo: %x\n", utf32_conteudo);
+
+//     if (utf32_BOM == 0xFEFF) /* verificando se BOM é little endian */
+//     {
+
+//         fwrite(&utf32_conteudo, sizeof(unsigned int), 1, arquivo_saida);
+//         printf("little endian\n");
+//     }
+
+//     else if (0x0000FEFF) /* verificando se BOM é big endian */
+//     {
+//         unsigned char byte_final, byte_inicial;
+
+//         byte_final = utf32_conteudo & 0b0000000011111111;
+//         byte_inicial = utf32_conteudo & 0b1111111100000000;
+//         printf("byte_final: %x\n", byte_final);
+//         printf("byte_inicial: %x\n", byte_inicial);
+
+//         fwrite(&byte_inicial, sizeof(unsigned char), 1, arquivo_saida);
+//         fwrite(&byte_final, sizeof(unsigned char), 1, arquivo_saida);
+
+//         printf("big endian");
+//     }
+
+//     else /* caso de BOM inválido */
+//     {
+//         fprintf(stderr, "BOM invalido");
+//         return -1;
+//     }
+
+//     return 0;
+// }
