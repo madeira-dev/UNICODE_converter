@@ -50,6 +50,8 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 
             concat_bytes = byte1;
             concat_bytes |= mask_to_concat;
+
+            fwrite(&concat_bytes, sizeof(unsigned int), 1, arquivo_saida);
         }
 
         else if (n_bytes == 2)
@@ -58,8 +60,6 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 
             unsigned char byte1, byte2;
             unsigned int mask_to_concat = 0x0, concat_bytes = 0x0, total_bits = 0;
-            // unsigned char endianness_byte1; /* primeiro byte a ser gravado (ficar na extrema direita) */
-            // unsigned char endianness_byte2; /* segundo byte a ser gravado (ficar na extrema esquerda) */
 
             printf("hex: %x\n", final_value);
 
@@ -78,20 +78,7 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             concat_bytes |= mask_to_concat;
 
             printf("concat_bytes antes de inverter os bytes: %x\n", concat_bytes);
-
-            /* invertendo os bytes para gravar em little endian // ta dando erradozzzzzzzzzzzzzzz*/
-
-            // endianness_byte1 = concat_bytes & 0b1111111100000000; /* talvez tenha q dar bitshift pra direita de 1 byte para fazer o or */
-            // endianness_byte1 = endianness_byte1 >> 8;
-            // endianness_byte2 = concat_bytes & 0b0000000011111111;
-
-            // concat_bytes = 0x0;
-
-            // concat_bytes |= endianness_byte2;
-            // concat_bytes <<= 8;
-            // concat_bytes |= endianness_byte1;
-
-            // printf("concat_bytes depois de inverter os bytes: %x\n", concat_bytes);
+            fwrite(&concat_bytes, sizeof(unsigned int), 1, arquivo_saida);
         }
 
         else if (n_bytes == 3)
@@ -101,9 +88,6 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             unsigned char byte1, byte2, byte3;
             unsigned int concat_bytes = 0x0, total_bits = 0, mask_to_concat = 0x0;
             unsigned char endianness_byte1, endianness_byte2;
-
-            // printf("hex: %x\n", final_value);
-            // printf("bin: %b\n", final_value);
 
             fread(&byte2, sizeof(unsigned char), 1, arquivo_entrada);
             fread(&byte3, sizeof(unsigned char), 1, arquivo_entrada);
@@ -124,24 +108,17 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             total_bits += count_bits(byte3);
             concat_bytes |= byte3;
             concat_bytes |= mask_to_concat;
-            printf("concat_bytes bin antes de inverter: %b\n", concat_bytes);
-            // printf("concat_bytes bin antes de inverter: %b\n", concat_bytes);
 
-            /* invertendo os bytes para gravar em little endian // ta dando erradozzzzzzzzzzzzzzz*/
-
+            /* invertendo os bytes para gravar em little endian */
             endianness_byte1 = (concat_bytes & 0b1111111100000000) >> 8; /* talvez tenha q dar bitshift pra direita de 1 byte para fazer o or */
-            printf("endianness_byte1: %x\n", endianness_byte1);
             endianness_byte2 = concat_bytes & 0b0000000011111111;
-            printf("endianness_byte2: %x\n", endianness_byte2);
 
             concat_bytes = 0x0;
 
             concat_bytes |= endianness_byte2;
             concat_bytes <<= 8;
             concat_bytes |= endianness_byte1;
-
-            printf("concat_bytes depois de inverter os bytes em hex: %x\n", concat_bytes);
-            // printf("concat_bytes depois de inverter os bytes em bin: %b\n", concat_bytes);
+            fwrite(&concat_bytes, sizeof(unsigned int), 1, arquivo_saida);
         }
 
         else if (n_bytes == 4)
@@ -150,6 +127,7 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 
             unsigned char byte1, byte2, byte3, byte4;
             unsigned int concat_bytes = 0x0, total_bits = 0, mask_to_concat = 0x0;
+            unsigned char endianness_byte1, endianness_byte2, endianness_byte3;
 
             printf("hex: %x\n", final_value);
 
@@ -179,7 +157,20 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             concat_bytes |= byte4;
             concat_bytes |= mask_to_concat;
 
+            printf("concat_bytes antes: %x\n", concat_bytes);
+
+            /* invertendo os bytes para gravar em little endian */
+            endianness_byte1 = (concat_bytes & 0b1111111100000000) >> 8;
+            endianness_byte2 = concat_bytes & 0b0000000011111111;
+
+            concat_bytes = 0x0;
+
+            concat_bytes |= endianness_byte2;
+            concat_bytes <<= 8;
+            concat_bytes |= endianness_byte1;
+
             printf("concat_bytes: %x\n", concat_bytes);
+            fwrite(&concat_bytes, sizeof(unsigned int), 1, arquivo_saida);
         }
     }
 
