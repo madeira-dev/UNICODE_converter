@@ -1,6 +1,23 @@
--> ler arquivo com valores em utf8
+-> ler arquivo com valores em utf8 - feito
+-> consertar condicao de parada do loop - com a condicao atual ta lendo o ultimo byte duas vezes
 -> converter valores lidos em utf8 para utf32
 -> gravar em arquivo de saida os valores convertidos de utf8 para utf32, lembrando do BOM
+-> o BOM sempre tem q ser do padrão little endian já q no enunciado pede pra gravar em little endian na utf32
+-> na parte de concatenar bits, fazer uma funcao para calcular o numero de bits ocupados pelo byte a ser concatenado
+e usar esse valor para dar o bitshift exato
+
+
+
+
+
+
+
+
+
+
+
+
+ideias:
 
 como ler o arquivo:
 -> ler o primeiro byte, passando ele pra um char (1 byte)

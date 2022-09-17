@@ -1,0 +1,16 @@
+-> ler BOM do arquivo utf32 -- FEITO
+
+-> ler conteudo do arquivo utf32 -- FEITO
+
+-> ver quanto que o caracter ocupa e se necessario "comprimir" em menos bytes -- FEITO
+
+-> precisa adicionar os bytes de representação na frente???
+
+-> sempre gravar em little endian???
+
+-> mover os testes de little endian/big endian pra fora do while e separar em funcoes a contage de bytes
+   e a gravacao deles no arquivo de saida -- FEITO
+
+-> ta com o mesmo erro de sempre ler o ultmo byte duas vezes, tem q mudar a condicao do while -- FEITO
+
+-> na vdd so add uma flag pra quando for little endian ou big endian, precisa fazer mais funcao n se pa -- FEITO
