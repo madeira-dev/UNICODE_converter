@@ -1,0 +1,8 @@
+-> ler arquivo com valores em utf32
+-> converter valores de utf32 para utf8
+-> gravar em arquivo de saida os valores convertidos de utf8 para utf32, lembrando de tirar o BOM
+
+como ler o arquivo:
+-> ler os primeiros 4 bytes para validar o BOM. caso seja
+invalido a funcao deve emitir uma mensagem de erro no stderr
+identificando isso. little-endian: FF FE 00 00; big-endian: 00 00 FE FF
