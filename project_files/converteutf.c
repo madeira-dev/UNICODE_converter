@@ -127,7 +127,7 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 
             unsigned char byte1, byte2, byte3, byte4;
             unsigned int concat_bytes = 0x0, total_bits = 0, mask_to_concat = 0x0;
-            unsigned char endianness_byte1, endianness_byte2, endianness_byte3;
+            unsigned char endianness_byte1, endianness_byte2;
 
             printf("hex: %x\n", final_value);
 
