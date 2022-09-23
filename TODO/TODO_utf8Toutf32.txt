@@ -1,24 +1,27 @@
--> ler arquivo com valores em utf8 - feito
+TODO:
+-> ler arquivo com valores em utf8 - FEITO
 -> consertar condicao de parada do loop - com a condicao atual ta lendo o ultimo byte duas vezes
--> converter valores lidos em utf8 para utf32
--> gravar em arquivo de saida os valores convertidos de utf8 para utf32, lembrando do BOM
--> o BOM sempre tem q ser do padrão little endian já q no enunciado pede pra gravar em little endian na utf32
+-> converter valores lidos em utf8 para utf32 - FEITO (verificar se ta certo)
+-> gravar em arquivo de saida os valores convertidos de utf8 para utf32, lembrando do BOM - FEITO (verificar se ta certo)
+-> o BOM sempre tem q ser do padrão little endian já q no enunciado pede pra gravar em little endian na utf32 - FEITO
 -> na parte de concatenar bits, fazer uma funcao para calcular o numero de bits ocupados pelo byte a ser concatenado
-e usar esse valor para dar o bitshift exato
+e usar esse valor para dar o bitshift exato - FEITO
+-> acho que ta errado a gravação pro arquivo utf32, ta adicionando zero a direita, tem q ser zero a esquerda
+se eu n me engano (a solução deve ser colocar padding antes)
+-> NA REAL É SÓ O JEITO Q TA ESCREVENDO NO ARQUIVO TA ESCREVENDO EM BIG ENDIAN EU ACHO OU LITTLE ENDIAN É UM DOS
+DOIS É SÓ ISSO // a solução por enquanto foi parar de usar unsigned int e usar so unsigned char mesmo, gravando
+3 bytes de 00 antes e depois do valor q eu quero mesmo, e na hora de ler eu leio usando unsigned int e sucesso
+
+PERGUNTAS:
+- corrigir o problema de estar lendo o ultimo byte duas vezes -> mudar pra fread -> FEITO
+- vê se a forma que ta gravando no arquivo de saida ta certa -> ta certo
 
 
 
 
 
 
-
-
-
-
-
-
-ideias:
-
+IDEIAS:
 como ler o arquivo:
 -> ler o primeiro byte, passando ele pra um char (1 byte)
 de acordo com o valor lido por esse char (0xxxxxxx, 110xxxxx, 1110xxxx, 11110xxx), ler o resto do arquivo
