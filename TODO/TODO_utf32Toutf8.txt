@@ -16,3 +16,14 @@
 -> na vdd so add uma flag pra quando for little endian ou big endian, precisa fazer mais funcao n se pa -- FEITO
 
 -> ta lendo errado? lendo um arquivo com 00 1f 24 14 n ta lendo esse 1f??? -- FEITO
+
+
+-> novos problemas :)
+   - problemas para conversão de caracteres de 4 bytes:
+      -- como todos eles, desde o menor até o maior, possuem f0, pelo fato de ter esse 0, ta tendo problema na conversao
+      -- fazer if para tratar esses casos com 0?
+
+   - problemas para conversão de caracteres de 3 bytes:
+      -- todos aqueles que apresentam 0 em sua representação hexadecimal estão dando problema
+   
+   - edge cases
