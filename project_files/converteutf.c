@@ -3,19 +3,17 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "converteutf.h"
 
 int count_bits(unsigned char byte);
 
 int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 {
-    unsigned char first_byte;
-    unsigned char final_value;
+    unsigned char first_byte, final_value;
     int n_bytes = 0;
 
     unsigned int BOM_to_write = 0x0000FEFF; /* BOM pra indicar que o arquivo foi gravado em little endian */
-    unsigned int tmp_bigEndian_BOM = 0xFFFE0000;
+    // unsigned int tmp_bigEndian_BOM = 0xFFFE0000;
     fwrite(&BOM_to_write, sizeof(unsigned int), 1, arquivo_saida);
 
     if (!arquivo_entrada)
@@ -24,14 +22,16 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
         return -1;
     }
 
-    while (fread(&first_byte, sizeof(unsigned char), 1, arquivo_entrada) == 1) /* ALTERAR CONDICAO DO WHILE. DESSE JEITO ELE LE O ÚLTIMO BYTE DUAS VEZES */
+    while (fread(&first_byte, sizeof(unsigned char), 1, arquivo_entrada) == 1)
     {
+        n_bytes = 0;
         final_value = first_byte;
+        printf("%b\n", first_byte);
 
         /* loop para descobrir quantos bits = 1, no início, o primeiro byte apresenta */
         while ((first_byte & 0b10000000) != 0)
         {
-            first_byte = first_byte << 1;
+            first_byte <<= 1;
             n_bytes++;
         }
 
@@ -43,8 +43,13 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             unsigned char byte1, padding_byte = 0; // corrigir o nome dessas variaveis
             // unsigned int mask_to_concat = 0x0, concat_bytes = 0x0;
 
+            // printf("antes: %x\n", first_byte);
+
             byte1 = final_value & 0b01111111;
-            printf("n_bytes=0 - byte1: %x\n\n", byte1);
+
+            // printf("depois: %x\n", first_byte);
+
+            // printf("n_bytes=0 - byte1: %x\n\n", byte1);
 
             // concat_bytes = (byte1 & 0x000000FF);
 
@@ -69,8 +74,8 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             byte1 = final_value & 0b00011111; /* definindo o primeiro byte como os bits do byte lido exceto os iniciais representando o numero de bytes total */
             byte2 = byte2 & 0b00111111;       /* & operation para remover bits de continuacao */
 
-            printf("n_bytes=2 - byte1: %x\n", byte1);
-            printf("n_bytes=2 - byte2: %x\n\n", byte2);
+            // printf("n_bytes=2 - byte1: %x\n", byte1);
+            // printf("n_bytes=2 - byte2: %x\n\n", byte2);
 
             /* ideia anterior que concatenava os bytes porem na hora de gravar ia em big endian */
             // concat_bytes = byte1;
@@ -103,9 +108,9 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             byte2 = byte2 & 0b00111111;       /* & operation para remover bits de continuacao */
             byte3 = byte3 & 0b00111111;       /* & operation para remover bits de continuacao */
 
-            printf("n_bytes=3 - byte1: %x\n", byte1);
-            printf("n_bytes=3 - byte2: %x\n", byte2);
-            printf("n_bytes=3 - byte3: %x\n\n", byte3);
+            // printf("n_bytes=3 - byte1: %x\n", byte1);
+            // printf("n_bytes=3 - byte2: %x\n", byte2);
+            // printf("n_bytes=3 - byte3: %x\n\n", byte3);
 
             /* a principio isso aqui é inutil */
             // concat_bytes = byte1;
@@ -142,26 +147,26 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 
             unsigned char byte1, byte2, byte3, byte4;
 
-            printf("hex: %x\n", final_value);
+            // printf("hex: %x\n", final_value);
 
             fread(&byte2, sizeof(unsigned char), 1, arquivo_entrada);
             fread(&byte3, sizeof(unsigned char), 1, arquivo_entrada);
             fread(&byte4, sizeof(unsigned char), 1, arquivo_entrada);
 
-            printf("n_bytes=4 - final_value antes: %x\n", final_value);
-            printf("n_bytes=4 - byte2 antes: %x\n", byte2);
-            printf("n_bytes=4 - byte3 antes: %x\n", byte3);
-            printf("n_bytes=4 - byte4 antes: %x\n\n", byte4);
+            // printf("n_bytes=4 - final_value antes: %x\n", final_value);
+            // printf("n_bytes=4 - byte2 antes: %x\n", byte2);
+            // printf("n_bytes=4 - byte3 antes: %x\n", byte3);
+            // printf("n_bytes=4 - byte4 antes: %x\n\n", byte4);
 
             byte1 = final_value & 0b00000111; /* definindo o primeiro byte como os bits do byte lido exceto os iniciais representando o numero de bytes total */
             byte2 = byte2 & 0b00111111;       /* & operation para remover bits de continuacao */
             byte3 = byte3 & 0b00111111;       /* & operation para remover bits de continuacao */
             byte4 = byte4 & 0b00111111;       /* & operation para remover bits de continuacao */
 
-            printf("n_bytes=4 - byte1: %x\n", byte1);
-            printf("n_bytes=4 - byte2: %x\n", byte2);
-            printf("n_bytes=4 - byte3: %x\n", byte3);
-            printf("n_bytes=4 - byte4: %x\n\n", byte4);
+            // printf("n_bytes=4 - byte1: %x\n", byte1);
+            // printf("n_bytes=4 - byte2: %x\n", byte2);
+            // printf("n_bytes=4 - byte3: %x\n", byte3);
+            // printf("n_bytes=4 - byte4: %x\n\n", byte4);
 
             fwrite(&byte4, sizeof(unsigned char), 1, arquivo_saida);
             fwrite(&byte3, sizeof(unsigned char), 1, arquivo_saida);
@@ -224,15 +229,27 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
 
         if (endianness == 1) /* caso little endian */
         {
-            printf("ENTROU NO ENDIANNESS = 1\n");
+            unsigned char byte1, byte2, byte3, byte4;
             num_bytes = 0;
             final_value = utf32_conteudo;
-            printf("final_value: %x\n", final_value);
 
-            /* verificando quantidade de bytes usados para cada caracter */
+            printf("ENTROU NO ENDIANNESS = 1\n");
+            printf("%x\n", utf32_conteudo);
+
+            byte1 = final_value & 0x000000FF;
+            byte2 = (final_value & 0x0000FF00) >> 8;
+            byte3 = (final_value & 0x00FF0000) >> 16;
+            byte4 = (final_value & 0xFF000000) >> 24;
+
+            printf("byte1: %x\n", byte1);
+            printf("byte2: %x\n", byte2);
+            printf("byte3: %x\n", byte3);
+            printf("byte4: %x\n", byte4);
+
+            /* verificando quantidade de bytes realmente usados (antes da extensão para 32 bits) por cada caracter */
             while ((utf32_conteudo & 0x000000FF) != 0)
             {
-                utf32_conteudo = utf32_conteudo >> 8;
+                utf32_conteudo >>= 8;
                 num_bytes++;
             }
 
@@ -246,7 +263,7 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
                 byte1_to_write = final_value & 0x000000FF;
 
                 /* print de debug */
-                printf("byte_to_write 1: %x\n", byte1_to_write);
+                // printf("byte_to_write 1: %x\n", byte1_to_write);
 
                 /* concatenando os bytes com os respectivos bits de representacao */
                 byte1_to_write = (byte1_to_write | numBytes_bits);
@@ -270,9 +287,9 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
                 byte2_to_write = (byte2_to_write | numBytes_bits);
 
                 /* prints de debug */
-                printf("byte_to_write 1: %x\n", byte1_to_write);
-                printf("byte_to_write 2: %x\n", byte2_to_write);
-                printf("byte_to_write 3: %x\n", byte3_to_write);
+                // printf("byte_to_write 1: %x\n", byte1_to_write);
+                // printf("byte_to_write 2: %x\n", byte2_to_write);
+                // printf("byte_to_write 3: %x\n", byte3_to_write);
 
                 /* escrevendo os bytes para o arquivo de saída */
                 fwrite(&byte2_to_write, sizeof(unsigned char), 1, arquivo_saida);
@@ -310,7 +327,7 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
                 unsigned char numBytes_bits = 0b11110000; // bits representando numero de bytes ocupados pelo caracter
                 unsigned char cont_bits = 0b10000000;
 
-                printf("final_value utf32: %x\n", final_value);
+                // printf("final_value utf32: %x\n", final_value);
 
                 byte1_to_write = final_value & 0x000000FF;
                 byte2_to_write = (final_value & 0x0000FF00) >> 8;
@@ -324,10 +341,10 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
                 byte4_to_write = (byte4_to_write | numBytes_bits);
 
                 /* prints de debug */
-                printf("byte_to_write 1: %x\n", byte1_to_write);
-                printf("byte_to_write 2: %x\n", byte2_to_write);
-                printf("byte_to_write 3: %x\n", byte3_to_write);
-                printf("byte_to_write 4: %x\n", byte4_to_write);
+                // printf("byte_to_write 1: %x\n", byte1_to_write);
+                // printf("byte_to_write 2: %x\n", byte2_to_write);
+                // printf("byte_to_write 3: %x\n", byte3_to_write);
+                // printf("byte_to_write 4: %x\n", byte4_to_write);
 
                 /* escrevendo os bytes para o arquivo de saída */
                 fwrite(&byte4_to_write, sizeof(unsigned char), 1, arquivo_saida);
@@ -355,7 +372,7 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
             }
 
             /* tratando gravação de cada caracter dependendo da quantidade de bytes que ocupa */
-            if (num_bytes == 1) /* acrescentando os bits de continuacao, escrever 2 bytes */
+            if (num_bytes == 1)
             {
                 printf("bytes=1\n");
                 unsigned char byte1_to_write, byte2_to_write;
@@ -369,7 +386,7 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
                 fwrite(&byte1_to_write, sizeof(unsigned char), 1, arquivo_saida);
             }
 
-            else if (num_bytes == 2) /* acrescentando os bits de continuacao, escrever 3 bytes */
+            else if (num_bytes == 2)
             {
                 /* print de debug */
                 printf("bytes=2\n");
@@ -391,12 +408,9 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
 
             else if (num_bytes == 3)
             {
-                /* sabe-se que quando retirados os bits de continuacao de um caracter de 4 bytes, ele passa a
-                ter 3 bytes, então nesse caso aqui, acrescentaremos um byte na hora da escrita, escrevendo um
-                total de 4 bytes ao invés de apenas 3 */
-
                 /* print de debug */
                 printf("bytes=3\n");
+
                 unsigned char byte1_to_write, byte2_to_write, byte3_to_write, byte4_to_write;
                 unsigned char numBytes_bits = 0b11100000; // bits representando numero de bytes ocupados pelo caracter
                 unsigned char cont_bits = 0b10000000;
@@ -423,7 +437,7 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
                 fwrite(&byte1_to_write, sizeof(unsigned char), 1, arquivo_saida);
             }
 
-            else if (num_bytes == 4) /* mesmo acrescentando os bits de continuacao, ainda serão escritos 4 bytes */
+            else if (num_bytes == 4)
             {
                 printf("bytes=4\n");
                 unsigned char byte1_to_write, byte2_to_write, byte3_to_write, byte4_to_write;
