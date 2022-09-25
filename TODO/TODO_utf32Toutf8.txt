@@ -21,9 +21,15 @@
 -> novos problemas :)
    - problemas para conversão de caracteres de 4 bytes:
       -- como todos eles, desde o menor até o maior, possuem f0, pelo fato de ter esse 0, ta tendo problema na conversao
-      -- fazer if para tratar esses casos com 0?
+      -- fazer if para tratar esses casos com 0? espero q n seja isso
 
    - problemas para conversão de caracteres de 3 bytes:
       -- todos aqueles que apresentam 0 em sua representação hexadecimal estão dando problema
    
    - edge cases
+
+
+-> mudanças a serem feitas:
+   - eu to contando a quantidade de bytes que cada carater usa????????? utf32 sempre usa 4 bytes não é???? o erro ta aqui
+      -- imagino que eu deva alterar isso pra sempre considerar 4 bytes e então não vai ter erro de quando tiver 00 no hexadecimal
+      -- usar um for pra ciclar pelos bytes sempre considerando o limite do iterador como 4

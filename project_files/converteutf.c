@@ -148,6 +148,11 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             fread(&byte3, sizeof(unsigned char), 1, arquivo_entrada);
             fread(&byte4, sizeof(unsigned char), 1, arquivo_entrada);
 
+            printf("n_bytes=4 - final_value antes: %x\n", final_value);
+            printf("n_bytes=4 - byte2 antes: %x\n", byte2);
+            printf("n_bytes=4 - byte3 antes: %x\n", byte3);
+            printf("n_bytes=4 - byte4 antes: %x\n\n", byte4);
+
             byte1 = final_value & 0b00000111; /* definindo o primeiro byte como os bits do byte lido exceto os iniciais representando o numero de bytes total */
             byte2 = byte2 & 0b00111111;       /* & operation para remover bits de continuacao */
             byte3 = byte3 & 0b00111111;       /* & operation para remover bits de continuacao */
@@ -304,6 +309,8 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
                 unsigned char byte1_to_write, byte2_to_write, byte3_to_write, byte4_to_write;
                 unsigned char numBytes_bits = 0b11110000; // bits representando numero de bytes ocupados pelo caracter
                 unsigned char cont_bits = 0b10000000;
+
+                printf("final_value utf32: %x\n", final_value);
 
                 byte1_to_write = final_value & 0x000000FF;
                 byte2_to_write = (final_value & 0x0000FF00) >> 8;
