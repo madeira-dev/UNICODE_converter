@@ -18,7 +18,7 @@
 -> ta lendo errado? lendo um arquivo com 00 1f 24 14 n ta lendo esse 1f??? -- FEITO
 
 
--> novos problemas :)
+-> novos problemas :) JA FORAM CORRIGIDOS
    - problemas para conversão de caracteres de 4 bytes:
       -- como todos eles, desde o menor até o maior, possuem f0, pelo fato de ter esse 0, ta tendo problema na conversao
       -- fazer if para tratar esses casos com 0? espero q n seja isso
@@ -29,7 +29,7 @@
    - edge cases
 
 
--> mudanças a serem feitas:
+-> mudanças a serem feitas: TUDO ISSO AQUI JA FOI CORRIGIDO
    - eu to contando a quantidade de bytes que cada carater usa????????? utf32 sempre usa 4 bytes não é???? o erro ta aqui
       -- imagino que eu deva alterar isso pra sempre considerar 4 bytes e então não vai ter erro de quando tiver 00 no hexadecimal
       -- usar um for pra ciclar pelos bytes sempre considerando o limite do iterador como 4

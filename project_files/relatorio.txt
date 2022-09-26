@@ -1,0 +1,7 @@
+Integrantes do grupo:
+Gabriel de Oliveira Rosa Mariano Madeira 2111471 3WB
+Juliana Pinheiro dos Santos 2110516 3WB
+
+A respeito do código:
+	- Conversão de utf8 para utf32: funcionando
+	- Conversão de utf32 para utf8: funcionando
