@@ -182,10 +182,11 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 int count_bits(unsigned char byte)
 {
     unsigned int count = 0;
+
     while (byte)
     {
-        count++;
         byte >>= 1;
+        count++;
     }
 
     return count;
@@ -226,6 +227,7 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
 
     while (fread(&utf32_conteudo, sizeof(unsigned int), 1, arquivo_entrada) == 1)
     {
+        num_bytes = 0;
 
         if (endianness == 1) /* caso little endian */
         {
@@ -236,15 +238,23 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
             printf("ENTROU NO ENDIANNESS = 1\n");
             printf("%x\n", utf32_conteudo);
 
-            byte1 = final_value & 0x000000FF;
-            byte2 = (final_value & 0x0000FF00) >> 8;
-            byte3 = (final_value & 0x00FF0000) >> 16;
-            byte4 = (final_value & 0xFF000000) >> 24;
+            // byte1 = final_value & 0x000000FF; // byte mais significativo
+            // byte2 = (final_value & 0x0000FF00) >> 8;
+            // byte3 = (final_value & 0x00FF0000) >> 16;
+            // byte4 = (final_value & 0xFF000000) >> 24; // byte menos significativo
 
-            printf("byte1: %x\n", byte1);
-            printf("byte2: %x\n", byte2);
-            printf("byte3: %x\n", byte3);
-            printf("byte4: %x\n", byte4);
+            // if (byte1 != 0 && byte2 == 0 && byte3 == 0 && byte4 == 0) // nesse caso, o caracter só precisa de 1 byte
+            // {
+            // }
+
+            // if (byte1 != 0 && byte2 != 0 && byte3 == 0 && byte4 == 0) // nesse caso, o caracter só precisa de 2 bytes
+            // {
+            // }
+
+            // printf("byte1: %x\n", byte1);
+            // printf("byte2: %x\n", byte2);
+            // printf("byte3: %x\n", byte3);
+            // printf("byte4: %x\n", byte4);
 
             /* verificando quantidade de bytes realmente usados (antes da extensão para 32 bits) por cada caracter */
             while ((utf32_conteudo & 0x000000FF) != 0)
@@ -278,46 +288,83 @@ int converteUtf32Para8(FILE *arquivo_entrada, FILE *arquivo_saida)
                 unsigned char byte1_to_write, byte2_to_write, byte3_to_write;
                 unsigned char numBytes_bits = 0b11000000; // bits representando numero de bytes ocupados pelo caracter
                 unsigned char cont_bits = 0b10000000;
+                int count;
 
                 byte1_to_write = final_value & 0x000000FF;
                 byte2_to_write = (final_value & 0x0000FF00) >> 8;
 
-                /* concatenando os bytes com os respectivos bits de representacao */
-                byte1_to_write = (byte1_to_write | cont_bits);
-                byte2_to_write = (byte2_to_write | numBytes_bits);
+                count = count_bits(byte2_to_write);
+                printf("segundo byte %b\n", byte2_to_write);
 
-                /* prints de debug */
-                // printf("byte_to_write 1: %x\n", byte1_to_write);
-                // printf("byte_to_write 2: %x\n", byte2_to_write);
-                // printf("byte_to_write 3: %x\n", byte3_to_write);
+                printf("adasdas %d\n", count);
+                if (count > 5)
+                {
+                    numBytes_bits = 0b11100000;
+                    byte3_to_write = (final_value & 0x00FF0000) >> 16;
 
-                /* escrevendo os bytes para o arquivo de saída */
-                fwrite(&byte2_to_write, sizeof(unsigned char), 1, arquivo_saida);
-                fwrite(&byte1_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                    byte1_to_write = (byte1_to_write | cont_bits);
+                    byte2_to_write = (byte2_to_write | cont_bits);
+                    byte3_to_write = (byte3_to_write | numBytes_bits);
+
+                    fwrite(&byte3_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                    fwrite(&byte2_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                    fwrite(&byte1_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                }
+
+                else
+                {
+                    byte1_to_write = (byte1_to_write | cont_bits);
+                    byte2_to_write = (byte2_to_write | numBytes_bits);
+
+                    /* escrevendo os bytes para o arquivo de saída */
+                    fwrite(&byte2_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                    fwrite(&byte1_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                }
             }
 
             else if (num_bytes == 3)
             {
                 printf("bytes=3\n");
-                unsigned char byte1_to_write, byte2_to_write, byte3_to_write, byte4_to_write = 0x0;
+                unsigned char byte1_to_write, byte2_to_write, byte3_to_write, byte4_to_write;
                 unsigned char numBytes_bits = 0b11100000; // bits representando numero de bytes ocupados pelo caracter
                 unsigned char cont_bits = 0b10000000;
+                int count;
 
                 byte1_to_write = final_value & 0x000000FF;
                 byte2_to_write = (final_value & 0x0000FF00) >> 8;
                 byte3_to_write = (final_value & 0x00FF0000) >> 16;
 
-                /* concatenando os bytes com os respectivos bits de representacao */
-                byte1_to_write = (byte1_to_write | cont_bits);
-                byte2_to_write = (byte2_to_write | cont_bits);
-                byte3_to_write = (byte3_to_write | numBytes_bits);
-                // byte4_to_write = (byte4_to_write | numBytes_bits);
+                count = count_bits(byte3_to_write);
 
-                /* escrevendo os bytes para o arquivo de saída */
-                // fwrite(&byte4_to_write, sizeof(unsigned char), 1, arquivo_saida);
-                fwrite(&byte3_to_write, sizeof(unsigned char), 1, arquivo_saida);
-                fwrite(&byte2_to_write, sizeof(unsigned char), 1, arquivo_saida);
-                fwrite(&byte1_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                if (count > 4)
+                {
+                    numBytes_bits = 0b11110000;
+                    byte4_to_write = (final_value & 0xFF000000) >> 24;
+
+                    byte1_to_write = (byte1_to_write | cont_bits);
+                    byte2_to_write = (byte2_to_write | cont_bits);
+                    byte3_to_write = (byte3_to_write | cont_bits);
+                    byte4_to_write = (byte4_to_write | numBytes_bits);
+
+                    fwrite(&byte4_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                    fwrite(&byte3_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                    fwrite(&byte2_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                    fwrite(&byte1_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                }
+
+                else
+                {
+                    byte1_to_write = (byte1_to_write | cont_bits);
+                    byte2_to_write = (byte2_to_write | cont_bits);
+                    byte3_to_write = (byte3_to_write | numBytes_bits);
+                    // byte4_to_write = (byte4_to_write | numBytes_bits);
+
+                    /* escrevendo os bytes para o arquivo de saída */
+                    // fwrite(&byte4_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                    fwrite(&byte3_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                    fwrite(&byte2_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                    fwrite(&byte1_to_write, sizeof(unsigned char), 1, arquivo_saida);
+                }
             }
 
             else if (num_bytes == 4)
