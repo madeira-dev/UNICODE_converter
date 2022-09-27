@@ -20,7 +20,7 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
     unsigned int tmp_bigEndian_BOM = 0xFFFE0000; /* BOM pra indicar que o arquivo foi gravado em big endian  */
     int n_bytes = 0;
 
-    fwrite(&tmp_bigEndian_BOM, sizeof(unsigned int), 1, arquivo_saida);
+    fwrite(&BOM_to_write, sizeof(unsigned int), 1, arquivo_saida);
 
     while (fread(&first_byte, sizeof(unsigned char), 1, arquivo_entrada) == 1)
     {
@@ -41,10 +41,10 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
 
             byte1 = final_value & 0b01111111; /* & operation para remover bit de representacao */
 
-            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
-            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
-            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
             fwrite(&byte1, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
         }
 
         else if (n_bytes == 2)
@@ -57,10 +57,10 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             byte1 = final_value & 0b00011111; /* definindo o primeiro byte como os bits do byte lido exceto os iniciais representando o numero de bytes total */
             byte2 = byte2 & 0b00111111;       /* & operation para remover bits de continuacao */
 
-            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
-            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
-            fwrite(&byte1, sizeof(unsigned char), 1, arquivo_saida);
             fwrite(&byte2, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&byte1, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
         }
 
         else if (n_bytes == 3)
@@ -74,10 +74,10 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             byte2 = byte2 & 0b00111111;       /* & operation para remover bits de continuacao */
             byte3 = byte3 & 0b00111111;       /* & operation para remover bits de continuacao */
 
-            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
-            fwrite(&byte1, sizeof(unsigned char), 1, arquivo_saida);
-            fwrite(&byte2, sizeof(unsigned char), 1, arquivo_saida);
             fwrite(&byte3, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&byte2, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&byte1, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&padding_byte, sizeof(unsigned char), 1, arquivo_saida);
         }
 
         else if (n_bytes == 4)
@@ -93,10 +93,10 @@ int converteUtf8Para32(FILE *arquivo_entrada, FILE *arquivo_saida)
             byte3 = byte3 & 0b00111111;       /* & operation para remover bits de continuacao */
             byte4 = byte4 & 0b00111111;       /* & operation para remover bits de continuacao */
 
-            fwrite(&byte1, sizeof(unsigned char), 1, arquivo_saida);
-            fwrite(&byte2, sizeof(unsigned char), 1, arquivo_saida);
-            fwrite(&byte3, sizeof(unsigned char), 1, arquivo_saida);
             fwrite(&byte4, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&byte3, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&byte2, sizeof(unsigned char), 1, arquivo_saida);
+            fwrite(&byte1, sizeof(unsigned char), 1, arquivo_saida);
         }
     }
     return 0;
